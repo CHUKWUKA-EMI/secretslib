@@ -1,4 +1,4 @@
-package secretmanagerv1
+package secretmanager
 
 import (
 	"log"
@@ -8,11 +8,11 @@ import (
 	"github.com/chukwuka-emi/secretslib/internal/utils"
 )
 
-type SecretProvider string
+type Provider string
 
 const (
-	Vault     SecretProvider = "vault"
-	Infisical SecretProvider = "infisical"
+	Vault     Provider = "vault"
+	Infisical Provider = "infisical"
 )
 
 type InfisicalRetrieveSecretOptions = infisical.RetrieveSecretOptions
@@ -22,15 +22,27 @@ type SecretManager interface {
 	GetSecret(options interface{}) (string, error)
 }
 
-type SecretManagerOptions struct {
-	Provider     SecretProvider
+type Options struct {
+	Provider     Provider
 	ClientID     string
 	ClientSecret string
 	HTTPClient   *http.Client
 	Logger       *log.Logger
 }
 
-func NewSecretManager(options SecretManagerOptions) SecretManager {
+// New creates a new SecretManager instance based on the provided options
+func New(options Options) SecretManager {
+	if options.Provider == "" {
+		panic("secret manager provider is required")
+	}
+	if options.ClientID == "" {
+		panic("client ID is required")
+	}
+	if options.ClientSecret == "" {
+		panic("client secret is required")
+	}
+
+	// Set default HTTP client and logger if not provided
 	if options.HTTPClient == nil {
 		options.HTTPClient = utils.HTTPClient
 	}
